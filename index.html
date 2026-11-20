@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>L'Oréal Smart Product Advisor</title>
+    <title>L'Oréal Routine Builder</title>
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
@@ -19,23 +19,166 @@
     <div class="page-wrapper">
       <!------- Header / Branding ------->
       <header class="site-header">
-        <!-- L'Oréal logo for branding -->
-        <img
-          src="img/loreal-logo.png"
-          alt="L'Oréal logo"
-          class="site-logo"
-        />
-        <h1 class="site-title">Smart Product Advisor</h1>
+        <img src="img/loreal-logo.png" alt="L'Oréal logo" class="site-logo" />
+        <h1 class="site-title">Product-Aware Routine Builder</h1>
+        <p class="site-tagline">
+          Browse real products, build your routine, and chat with your AI
+          beauty advisor.
+        </p>
       </header>
 
-      <!------- Chat Area ------->
       <main>
-        <section class="chatbox">
-          <!-- Shows the user's latest question above the chat response -->
-          <div id="latestQuestion" class="latest-question" hidden></div>
+        <!------- 1. Personalization: skin type + concerns ------->
+        <section class="panel" id="personalizeSection">
+          <h2 class="panel-title">
+            <span class="material-icons">face</span> Personalize (optional)
+          </h2>
+
+          <div class="personalize-grid">
+            <div>
+              <label for="skinType" class="field-label">Skin type</label>
+              <select id="skinType" class="field-select">
+                <option value="">No preference</option>
+                <option value="oily">Oily</option>
+                <option value="dry">Dry</option>
+                <option value="combination">Combination</option>
+                <option value="normal">Normal</option>
+                <option value="sensitive">Sensitive</option>
+              </select>
+            </div>
+
+            <div>
+              <span class="field-label">Skin concerns</span>
+              <!-- Checkboxes so users can pick more than one concern -->
+              <div class="concerns" id="concernsBox">
+                <label><input type="checkbox" value="acne" /> Acne</label>
+                <label><input type="checkbox" value="dryness" /> Dryness</label>
+                <label><input type="checkbox" value="dark spots" /> Dark spots</label>
+                <label><input type="checkbox" value="uneven skin tone" /> Uneven tone</label>
+                <label><input type="checkbox" value="fine lines" /> Fine lines</label>
+                <label><input type="checkbox" value="sensitive skin" /> Sensitivity</label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!------- 2. Product browsing ------->
+        <section class="panel" id="productsSection">
+          <h2 class="panel-title">
+            <span class="material-icons">storefront</span> Browse Products
+          </h2>
+
+          <!-- Search bar + category filter -->
+          <div class="browse-controls">
+            <div class="search-wrap">
+              <span class="material-icons">search</span>
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Search products by name, brand, or ingredient…"
+                autocomplete="off"
+              />
+            </div>
+
+            <select id="categoryFilter" class="field-select">
+              <option value="">All categories</option>
+              <option value="cleanser">Cleansers</option>
+              <option value="serum">Serums</option>
+              <option value="treatment">Treatments</option>
+              <option value="moisturizer">Moisturizers</option>
+              <option value="sunscreen">Sunscreens</option>
+              <option value="eye">Eye Care</option>
+            </select>
+          </div>
+
+          <!-- Product cards are rendered here by script.js -->
+          <div id="productGrid" class="product-grid"></div>
+
+          <!-- Shown when a search returns nothing -->
+          <p id="noResults" class="muted-note" hidden>
+            😕 No products match your search. Try a different word or category.
+          </p>
+
+          <div class="center">
+            <button id="showMoreBtn" class="btn btn-outline" hidden>
+              Show More Products
+            </button>
+          </div>
+        </section>
+
+        <!------- 3. Selected products ------->
+        <section class="panel" id="selectedSection">
+          <h2 class="panel-title">
+            <span class="material-icons">favorite</span>
+            Selected Products
+            <span id="selectedCount" class="count-badge">0</span>
+          </h2>
+
+          <div id="selectedList" class="selected-list">
+            <!-- Selected product chips are rendered here -->
+          </div>
+          <p id="emptySelection" class="muted-note">
+            You haven't selected any products yet. Click
+            <strong>Add to Routine</strong> on a product card above.
+          </p>
+
+          <div class="selected-actions">
+            <button id="generateBtn" class="btn btn-primary">
+              <span class="material-icons">auto_awesome</span>
+              Generate My Routine
+            </button>
+            <button id="clearBtn" class="btn btn-outline">
+              <span class="material-icons">delete_outline</span>
+              Clear Selected Products
+            </button>
+          </div>
+        </section>
+
+        <!------- 4. Generated routine ------->
+        <section class="panel" id="routineSection" hidden>
+          <h2 class="panel-title">
+            <span class="material-icons">checklist</span> Your Personalized Routine
+          </h2>
+
+          <!-- Morning / Evening tabs -->
+          <div class="tabs" role="tablist">
+            <button id="amTab" class="tab active" type="button">
+              ☀️ Morning (AM)
+            </button>
+            <button id="pmTab" class="tab" type="button">
+              🌙 Evening (PM)
+            </button>
+          </div>
+
+          <div id="amRoutine" class="routine-list"></div>
+          <div id="pmRoutine" class="routine-list" hidden></div>
+
+          <!-- Warnings about product combinations -->
+          <div id="routineWarnings" class="routine-warnings" hidden></div>
+
+          <!-- AI-written personalized summary of the routine -->
+          <div id="aiSummary" class="ai-summary" hidden></div>
+
+          <div class="center">
+            <button id="regenerateBtn" class="btn btn-outline">
+              <span class="material-icons">refresh</span>
+              Regenerate Routine
+            </button>
+          </div>
+        </section>
+
+        <!------- 5. AI Chatbot ------->
+        <section class="panel" id="chatSection">
+          <h2 class="panel-title">
+            <span class="material-icons">chat</span> Ask Your AI Beauty Advisor
+          </h2>
+          <p class="muted-note">
+            The advisor knows your selected products and routine. Try:
+            “Can I use these products together?” or “Which should I use first?”
+          </p>
 
           <div id="chatWindow" class="chat-window">
-            <!-- messages will be appended here via JS -->
+            <!-- Chat messages are appended here by script.js -->
           </div>
 
           <form id="chatForm" class="chat-form">
@@ -44,11 +187,11 @@
               id="userInput"
               name="userInput"
               type="text"
-              placeholder="Ask me about products or routines…"
+              placeholder="Ask about your products or routine…"
               autocomplete="off"
               required
             />
-            <button type="submit" id="sendBtn">
+            <button type="submit" id="sendBtn" class="btn btn-primary send-btn">
               <span class="material-icons">send</span>
               <span class="visually-hidden">Send</span>
             </button>
@@ -56,18 +199,34 @@
         </section>
       </main>
 
-      <!------- Footer Links ------->
+      <!------- Footer ------->
       <footer class="site-footer">
         <p>&copy; 2025 L'Oréal. All rights reserved.</p>
+        <p class="disclaimer">
+          This tool provides general skincare information, not medical advice.
+          For skin conditions, consult a dermatologist.
+        </p>
         <nav>
-          <!-- These URLs are placeholders -->
+          <a href="https://www.loreal.com" target="_blank" rel="noopener">L'Oréal.com</a>
           <a href="#">Privacy Policy</a>
           <a href="#">Terms of Use</a>
-          <a href="#">Contact</a>
         </nav>
       </footer>
     </div>
 
+    <!------- Product details modal ------->
+    <div id="modalOverlay" class="modal-overlay" hidden>
+      <div class="modal" role="dialog" aria-modal="true">
+        <button id="modalClose" class="modal-close" aria-label="Close">
+          <span class="material-icons">close</span>
+        </button>
+        <!-- Modal content is filled in by script.js -->
+        <div id="modalBody"></div>
+      </div>
+    </div>
+
+    <!-- products.js must load first so script.js can use PRODUCTS -->
+    <script src="products.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
